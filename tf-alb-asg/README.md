@@ -11,10 +11,11 @@ This terraform script consists of :
 ![image](./architecture.jpeg)
 
 ## Prerequisites
-* ECR URL: You should upload your Dockerfile to ECR first. 
+* keypair: You should create your keypair first to the corresponding region.
 
 ## How to use
-1. Create a terraform.tfvars file and fill in the variables. You can refer to the terraform.tfvars.template file.
+1. Create a terraform.tfvars file and fill in the variables. You can refer to the `terraform.tfvars.template` file.
+
 2. Run the following commands:
 ```bash
 terraform init
