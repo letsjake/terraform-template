@@ -29,6 +29,11 @@ module "vpc" {
 
   azs                  = ["apne2-az1", "apne2-az2"]
   public_subnets       = ["172.31.4.0/24", "172.31.5.0/24"] 
+  private_subnets      = ["172.31.6.0/24", "172.31.7.0/24"]
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  one_nat_gateway_per_az = false
+
   enable_dns_hostnames = true
   enable_dns_support   = true
 }
@@ -69,7 +74,7 @@ resource "aws_launch_template" "app" {
     create_before_destroy = true
   }
   network_interfaces {
-    associate_public_ip_address = true
+    associate_public_ip_address = false
     security_groups             = [aws_security_group.instance.id]
   }
   tag_specifications {
@@ -83,7 +88,8 @@ resource "aws_autoscaling_group" "app" {
   min_size             = 1
   max_size             = 2
   desired_capacity     = 2
-  vpc_zone_identifier  = module.vpc.public_subnets
+  vpc_zone_identifier  = module.vpc.private_subnets
+  target_group_arns    = [aws_lb_target_group.app.arn]
 
   health_check_type    = "ELB"
 
@@ -128,16 +134,26 @@ resource "aws_lb_listener" "app" {
 
 resource "aws_lb_target_group" "app" {
   name     = "${var.PROJECT}-app"
-  port     = 80
+  port     = var.CONTAINER_PORT
   protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
   target_type = "instance"
   load_balancing_algorithm_type = "round_robin"
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    port                = var.CONTAINER_PORT
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 10
+  
+  }
 }
 
 resource "aws_security_group" "instance" {
-  name = "${var.PROJECT}-instance"
-  
+  name    = "${var.PROJECT}-instance"
   #For SSH 
   ingress {
     from_port       = 22
@@ -146,8 +162,9 @@ resource "aws_security_group" "instance" {
     cidr_blocks     = ["0.0.0.0/0"]
   }
   ingress {
-    from_port       = 80
-    to_port         = 80
+    description     = "Traffic from ALB to EC2 instances"
+    from_port       = var.CONTAINER_PORT
+    to_port         = var.CONTAINER_PORT
     protocol        = "tcp"
     security_groups = [aws_security_group.lb.id]
   }
@@ -162,7 +179,7 @@ resource "aws_security_group" "instance" {
 }
 
 resource "aws_security_group" "lb" {
-  name = "${var.PROJECT}-lb"
+  name   = "${var.PROJECT}-lb"
   ingress {
     from_port   = 80
     to_port     = 80
@@ -183,7 +200,6 @@ resource "aws_security_group" "lb" {
 ##############################
 # IAM
 ##############################
-
 resource "aws_iam_role" "ec2_ecr_access_role" {
   name = "${var.PROJECT}-ec2-ecr-access-role"
 

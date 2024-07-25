@@ -22,4 +22,4 @@ aws ecr get-login-password --region $REGION | sudo docker login --username AWS -
 sudo docker pull $ECR_URL
 
 # Run the Docker container
-sudo docker run -d -p $HOST_PORT:$CONTAINER_PORT $ECR_URL
+sudo docker run -d -p $CONTAINER_PORT:$CONTAINER_PORT $ECR_URL
