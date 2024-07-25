@@ -1,6 +1,4 @@
 #!/bin/bash
-export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
-export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
 export REGION="${REGION}"
 export ECR_URL="${ECR_URL}"
 export HOST_PORT="${HOST_PORT}"
