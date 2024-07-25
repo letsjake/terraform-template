@@ -1,0 +1,17 @@
+import { Router } from 'express';
+import { ip } from 'address'
+
+import { errorHandler } from '../error';
+
+const router = Router();
+
+router.get('/', (req, res) => {
+    try {
+        const serverIp = ip();
+        res.status(200).send(`Hello, World! \n Destination IP: ${serverIp}`);
+    } catch (error) {
+        errorHandler(error, res);
+    }
+});
+
+export default router;
