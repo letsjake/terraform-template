@@ -17,18 +17,13 @@ variable "DEFAULT_TAGS" {
 ## ENV used in shell script
 ############################
 
-variable "AWS_ACCESS_KEY_ID" {
-  description = "AWS access key"
+variable "AWS_ACCOUNT_ID" {
+  description = "AWS account ID"
   type        = string 
 }
 
-variable "AWS_SECRET_ACCESS_KEY" {
-    description = "AWS secret key"
-    type        = string
-}
-
-variable "ECR_URL" {
-    description = "AWS ECR URL"
+variable "KEYPAIR_NAME" {
+    description = "Key pair name to connect to the instance"
     type        = string
 }
 

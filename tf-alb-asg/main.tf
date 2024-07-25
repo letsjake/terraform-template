@@ -1,11 +1,11 @@
 terraform {
+  required_version = "~> 1.9.2"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.38"
+      version = "~> 5.30.0"
     }
   }
-  required_version = ">= 0.15"
 }
 
 provider "aws" {
@@ -22,9 +22,9 @@ provider "aws" {
 # ref: https://github.com/terraform-aws-modules/terraform-aws-vpc
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "2.77.0"
+  version = "5.9.0"
 
-  name = "main-vpc"
+  name = "${var.PROJECT}-vpc"
   cidr = "172.31.0.0/16"
 
   azs                  = ["apne2-az1", "apne2-az2"]
@@ -42,25 +42,39 @@ data "aws_ami" "amazon-linux" {
 
   filter {
     name   = "name"
-    values = ["amzn-ami-2018.03.20230627-amazon-ecs-optimized"]
+    values = ["amzn-ami-minimal-hvm-*-x86_64-ebs"]
   }
 }
 
-resource "aws_launch_configuration" "app" {
+resource "aws_launch_template" "app" {
   name_prefix     = "${var.PROJECT}-"
+  # name            = "${var.PROJECT}-template"
+
   image_id        = data.aws_ami.amazon-linux.id
-  instance_type   = "t2.small"
-  user_data       = templatefile("${path.module}/docker_run_template.sh", {
-    AWS_ACCESS_KEY_ID       = var.AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY   = var.AWS_SECRET_ACCESS_KEY
-    ECR_URL                 = var.ECR_URL
+  instance_type   = "t3.small"
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2_ecr_profile.name
+  }
+
+  user_data       = base64encode(templatefile("${path.module}/docker-run-command.sh", {
+    REGION                  = var.REGION
+    ECR_URL                 = aws_ecr_repository.main.repository_url
     HOST_PORT               = var.HOST_PORT
     CONTAINER_PORT           = var.CONTAINER_PORT
-  })
-  security_groups = [aws_security_group.instance.id]
+  }))
 
+  key_name        = var.KEYPAIR_NAME 
   lifecycle {
     create_before_destroy = true
+  }
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.instance.id]
+  }
+  tag_specifications {
+    resource_type = "instance"
+    tags = var.DEFAULT_TAGS
   }
 }
 
@@ -69,11 +83,14 @@ resource "aws_autoscaling_group" "app" {
   min_size             = 1
   max_size             = 2
   desired_capacity     = 2
-  launch_configuration = aws_launch_configuration.app.name
   vpc_zone_identifier  = module.vpc.public_subnets
 
   health_check_type    = "ELB"
 
+  launch_template {
+    id      = aws_launch_template.app.id
+    version = "$Latest"
+  }
   tag {
     key                 = "name"
     value               = var.PROJECT
@@ -120,13 +137,20 @@ resource "aws_lb_target_group" "app" {
 
 resource "aws_security_group" "instance" {
   name = "${var.PROJECT}-instance"
+  
+  #For SSH 
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
   ingress {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.lb.id]
   }
-
   egress {
     from_port       = 0
     to_port         = 0
@@ -160,6 +184,48 @@ resource "aws_security_group" "lb" {
 # IAM
 ##############################
 
+resource "aws_iam_role" "ec2_ecr_access_role" {
+  name = "${var.PROJECT}-ec2-ecr-access-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "ecr_access_policy" {
+  name = "${var.PROJECT}-ecr-access-policy"
+  role = aws_iam_role.ec2_ecr_access_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "ec2_ecr_profile" {
+  name = "${var.PROJECT}-ec2-ecr-profile"
+  role = aws_iam_role.ec2_ecr_access_role.name
+}
 
 ###############################
 # Outputs
