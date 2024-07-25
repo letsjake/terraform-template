@@ -1,0 +1,12 @@
+PROJECT                 = "learn-terraform"
+REGION                  = "ap-northeast-2"
+DEFAULT_TAGS = {
+    "name"      = "learn-terraform"
+    "createdBy" = "jake"
+}
+
+AWS_ACCESS_KEY_ID       = ""
+AWS_SECRET_ACCESS_KEY   = ""
+ECR_URL                 = "<YOUR SERVER IMAGE ECR URL>"
+HOST_PORT               = 80
+CONTAINER_PORT          = 80
