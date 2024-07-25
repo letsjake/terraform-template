@@ -20,4 +20,4 @@ RUN yarn build
 EXPOSE 80
 
 # Start the application
-CMD ["yarn", "start:express"]
+CMD ["yarn", "start"]

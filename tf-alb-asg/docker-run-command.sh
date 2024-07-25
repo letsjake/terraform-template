@@ -1,4 +1,11 @@
 #!/bin/bash
+export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+export REGION="${REGION}"
+export ECR_URL="${ECR_URL}"
+export HOST_PORT="${HOST_PORT}"
+export CONTAINER_PORT="${CONTAINER_PORT}"
+
 # Install updates and necessary packages
 sudo yum update -y
 sudo yum install -y amazon-linux-extras docker
@@ -9,10 +16,6 @@ sudo usermod -a -G docker ec2-user
 newgrp docker
 # Install AWS CLI
 sudo yum install -y aws-cli
-
-# Set AWS credentials (replace with your actual keys)
-export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 
 # Log in to Amazon ECR
 aws ecr get-login-password --region $REGION | sudo docker login --username AWS --password-stdin $ECR_URL
