@@ -1,14 +1,15 @@
 # ALB + EC2 AutoScaling Group
 
 This terraform script consists of :
-* VPC config(w/o private subnet)
+* VPC config
+* subnet, AZ, IGW, Route Table, NAT config
 * ALB
 * EC2 AutoScaling Group
 * Security Group
 * ALB Target Group
 
 ## Architecture
-![image](./architecture.jpeg)
+![image](./architecture.png)
 
 ## Prerequisites
 * keypair: You should create your keypair first to the corresponding region.
