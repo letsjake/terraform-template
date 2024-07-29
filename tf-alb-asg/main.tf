@@ -58,6 +58,13 @@ resource "aws_launch_template" "app" {
   image_id        = data.aws_ami.amazon-linux.id
   instance_type   = "t3.small"
 
+  block_device_mappings {
+    device_name = "/dev/xvda" # root volume
+    ebs {
+      volume_size = 30
+    }
+  }
+
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_ecr_profile.name
   }
@@ -121,10 +128,28 @@ resource "aws_lb" "app" {
   subnets            = module.vpc.public_subnets
 }
 
-resource "aws_lb_listener" "app" {
+resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
   port              = "80"
   protocol          = "HTTP"
+
+  default_action {
+    type             = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.app.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.cert.arn
+  # depends_on        = [aws_acm_certificate_validation.alb_cert]
 
   default_action {
     type             = "forward"
@@ -186,6 +211,12 @@ resource "aws_security_group" "lb" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   egress {
     from_port   = 0
@@ -241,6 +272,36 @@ resource "aws_iam_role_policy" "ecr_access_policy" {
 resource "aws_iam_instance_profile" "ec2_ecr_profile" {
   name = "${var.PROJECT}-ec2-ecr-profile"
   role = aws_iam_role.ec2_ecr_access_role.name
+}
+
+##############################
+# certificate
+##############################
+resource "tls_private_key" "self" {
+  algorithm = "RSA"
+}
+
+#NOTE: This is a self-signed certificate and should not be used in production!
+resource "tls_self_signed_cert" "self" {
+  private_key_pem = tls_private_key.self.private_key_pem
+
+  subject {
+    common_name  = "example.com"
+    organization = "ACME Examples, Inc"
+  }
+
+  validity_period_hours = 24
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+
+resource "aws_acm_certificate" "cert" {
+  private_key      = tls_private_key.self.private_key_pem
+  certificate_body = tls_self_signed_cert.self.cert_pem
 }
 
 ###############################
