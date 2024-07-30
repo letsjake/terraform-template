@@ -1,0 +1,9 @@
+PROJECT                 = "learn-terraform"
+REGION                  = "ap-northeast-2"
+DEFAULT_TAGS = {
+    "name"      = "learn-terraform"
+    "createdBy" = "jake"
+}
+
+HOST_PORT               = 80
+CONTAINER_PORT          = 80
