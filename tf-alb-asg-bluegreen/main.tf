@@ -29,10 +29,10 @@ module "vpc" {
 
   azs                  = ["apne2-az1", "apne2-az2"]
   public_subnets       = ["172.31.4.0/24", "172.31.5.0/24"] 
-  private_subnets      = ["172.31.6.0/24", "172.31.7.0/24"]
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  one_nat_gateway_per_az = false
+  # private_subnets      = ["172.31.6.0/24", "172.31.7.0/24"]
+  # enable_nat_gateway   = true
+  # single_nat_gateway   = true
+  # one_nat_gateway_per_az = false
 
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -66,7 +66,7 @@ resource "aws_launch_template" "app" {
   }
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.ec2_ecr_profile.name
+    name = aws_iam_instance_profile.ec2_profile.name
   }
 
   user_data       = base64encode(templatefile("${path.module}/docker-run-command.sh", {
@@ -81,7 +81,7 @@ resource "aws_launch_template" "app" {
     create_before_destroy = true
   }
   network_interfaces {
-    associate_public_ip_address = false
+    associate_public_ip_address = true
     security_groups             = [aws_security_group.instance.id]
   }
   tag_specifications {
@@ -93,9 +93,9 @@ resource "aws_launch_template" "app" {
 resource "aws_autoscaling_group" "app" {
   name                 = var.PROJECT
   min_size             = 1
-  max_size             = 2
-  desired_capacity     = 2
-  vpc_zone_identifier  = module.vpc.private_subnets
+  max_size             = 4
+  desired_capacity     = 1
+  vpc_zone_identifier  = module.vpc.public_subnets
   target_group_arns    = [aws_lb_target_group.app.arn]
 
   health_check_type    = "ELB"
@@ -231,8 +231,8 @@ resource "aws_security_group" "lb" {
 ##############################
 # IAM
 ##############################
-resource "aws_iam_role" "ec2_ecr_access_role" {
-  name = "${var.PROJECT}-ec2-ecr-access-role"
+resource "aws_iam_role" "ec2_role" {
+  name = "${var.PROJECT}-ec2-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -248,9 +248,9 @@ resource "aws_iam_role" "ec2_ecr_access_role" {
   })
 }
 
-resource "aws_iam_role_policy" "ecr_access_policy" {
-  name = "${var.PROJECT}-ecr-access-policy"
-  role = aws_iam_role.ec2_ecr_access_role.id
+resource "aws_iam_role_policy" "overall" {
+  name = "${var.PROJECT}-overall"
+  role = aws_iam_role.ec2_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -261,7 +261,15 @@ resource "aws_iam_role_policy" "ecr_access_policy" {
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage"
+          "ecr:BatchGetImage",
+
+          "ec2:RunInstances",
+          "ec2:CreateTags",
+          "iam:PassRole",
+
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:ListObject",
         ]
         Resource = "*"
       }
@@ -269,9 +277,38 @@ resource "aws_iam_role_policy" "ecr_access_policy" {
   })
 }
 
-resource "aws_iam_instance_profile" "ec2_ecr_profile" {
-  name = "${var.PROJECT}-ec2-ecr-profile"
-  role = aws_iam_role.ec2_ecr_access_role.name
+resource "aws_iam_role_policy" "elb_access" {
+  name = "${var.PROJECT}-elb-access"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:DescribeLoadBalancers",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "${var.PROJECT}-ec2-profile"
+  role = aws_iam_role.ec2_role.name
 }
 
 ##############################
