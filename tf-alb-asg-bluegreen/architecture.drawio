@@ -1,0 +1,72 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36" version="24.7.6">
+  <diagram name="페이지-1" id="U9VAwmac6ZzeNQXaP2ZD">
+    <mxGraphModel dx="2522" dy="1299" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="70jRk5ugZvPK87IVvtC5-6" value="AWS Cloud" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=#00FF80;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#00FF80;dashed=0;rounded=1;strokeWidth=4;" vertex="1" parent="1">
+          <mxGeometry x="1304" y="330" width="210" height="460" as="geometry" />
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-1" value="Auto Scaling Group&lt;br&gt;&lt;br&gt;&lt;br&gt;ECR:older_version" style="sketch=0;outlineConnect=0;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.groupCenter;grIcon=mxgraph.aws4.group_auto_scaling_group;grStroke=0;strokeColor=#6c8ebf;fillColor=#dae8fc;verticalAlign=top;align=center;dashed=0;spacingTop=25;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="1337" y="400" width="130" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-2" value="Auto Scaling Group&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;ECR:latest&lt;/div&gt;" style="sketch=0;outlineConnect=0;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.groupCenter;grIcon=mxgraph.aws4.group_auto_scaling_group;grStroke=0;strokeColor=#82b366;fillColor=#d5e8d4;verticalAlign=top;align=center;dashed=0;spacingTop=25;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="1339" y="601" width="130" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-4" value="Amazon ECR" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#ffffff;fillColor=#232F3E;dashed=0;verticalLabelPosition=middle;verticalAlign=bottom;align=center;html=1;whiteSpace=wrap;fontSize=10;fontStyle=1;spacing=3;shape=mxgraph.aws4.productIcon;prIcon=mxgraph.aws4.ecr;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="505" y="337" width="80" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="G_3Qjhok5C-mF28kUs5W-5" target="70jRk5ugZvPK87IVvtC5-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-8" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;6. Zero-downtime &lt;br&gt;Deployment&lt;br&gt;&amp;nbsp;based on &lt;br&gt;Blue-Green Policy&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];rounded=1;" vertex="1" connectable="0" parent="70jRk5ugZvPK87IVvtC5-7">
+          <mxGeometry x="-0.4182" y="-4" relative="1" as="geometry">
+            <mxPoint x="32" y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-5" value="AWS CodeDeploy" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#ffffff;fillColor=#232F3E;dashed=0;verticalLabelPosition=middle;verticalAlign=bottom;align=center;html=1;whiteSpace=wrap;fontSize=10;fontStyle=1;spacing=3;shape=mxgraph.aws4.productIcon;prIcon=mxgraph.aws4.codedeploy;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="1053" y="507" width="80" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-5" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;5. Initiate Deployment &lt;br&gt;to the newest&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="G_3Qjhok5C-mF28kUs5W-6" target="G_3Qjhok5C-mF28kUs5W-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-6" value="AWS Lambda" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#ffffff;fillColor=#232F3E;dashed=0;verticalLabelPosition=middle;verticalAlign=bottom;align=center;html=1;whiteSpace=wrap;fontSize=10;fontStyle=1;spacing=3;shape=mxgraph.aws4.productIcon;prIcon=mxgraph.aws4.lambda;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="799" y="512" width="80" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-3" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;3. Amazon &lt;br&gt;EventBridge &lt;br&gt;keeps watching &lt;br&gt;the event of&lt;br&gt;&amp;nbsp;&quot;ECR update&quot;&amp;nbsp;&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="G_3Qjhok5C-mF28kUs5W-7" target="G_3Qjhok5C-mF28kUs5W-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-4" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;4. Trigger &lt;br&gt;&quot;Create Deployment&quot;&lt;br&gt;when ECR updates&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="G_3Qjhok5C-mF28kUs5W-7" target="G_3Qjhok5C-mF28kUs5W-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-7" value="" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eventbridge;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="797" y="338" width="84" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-2" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;2. Update ECR image &lt;br&gt;via &lt;b&gt;Github Actions&lt;/b&gt;&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="G_3Qjhok5C-mF28kUs5W-9" target="G_3Qjhok5C-mF28kUs5W-4">
+          <mxGeometry x="-0.3682" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="391" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-9" value="Remote&lt;div&gt;Github&lt;/div&gt;" style="dashed=0;outlineConnect=0;html=1;align=center;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;shape=mxgraph.webicons.github;gradientColor=#DFDEDE;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="389" y="506.5" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-1" value="&lt;font style=&quot;font-size: 13px;&quot;&gt;1. Push &lt;br&gt;main branch&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="G_3Qjhok5C-mF28kUs5W-10" target="G_3Qjhok5C-mF28kUs5W-9">
+          <mxGeometry x="0.0067" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="G_3Qjhok5C-mF28kUs5W-10" value="Local&lt;br&gt;Github" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.github_code;pointerEvents=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="180" y="509" width="60" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="70jRk5ugZvPK87IVvtC5-9" value="&lt;font face=&quot;Verdana&quot; style=&quot;font-size: 36px;&quot;&gt;Overall Pipeline&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="230" width="350" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

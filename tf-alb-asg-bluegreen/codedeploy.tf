@@ -128,40 +128,66 @@ resource "aws_iam_role_policy" "codedeploy_additional" {
   })
 }
 
-# resource "aws_iam_role" "lambda" {
-#   name = "${var.PROJECT}-lambda-codedeploy-role"
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [
-#       {
-#         Action = "sts:AssumeRole",
-#         Effect = "Allow",
-#         Principal = {
-#           Service = "lambda.amazonaws.com"
-#         },
-#         Effect = "Allow"
-#       }
-#     ]
-#   })
-# }
+resource "aws_iam_role" "lambda" {
+  name = "${var.PROJECT}-lambda-codedeploy-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        },
+        Effect = "Allow"
+      }
+    ]
+  })
+}
 
-# resource "aws_iam_role_policy" "lambda" {
-#   name = "${var.PROJECT}-lambda-codedeploy-policy"
-#   role = aws_iam_role.lambda.id
+resource "aws_iam_role_policy" "lambda" {
+  name = "${var.PROJECT}-lambda-codedeploy-policy"
+  role = aws_iam_role.lambda.id
 
-#   policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [
-#       {
-#         Effect = "Allow",
-#         Action = [
-#           "codedeploy:CreateDeployment"
-#         ],
-#         Resource = "*"
-#       }
-#     ]
-#   })
-# }
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "codedeploy:CreateDeployment",
+          "codedeploy:GetDeploymentConfig",
+          "codedeploy:GetApplicationRevision",
+          "codedeploy:RegisterApplicationRevision"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:ListBucket"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = "iam:PassRole"
+        Resource = "*"
+      }
+    ]
+  })
+}
 
 ###########################
 # Trigger Deployment
@@ -211,66 +237,66 @@ resource "aws_s3_object" "appspec_zip" {
   }
 }
 
-# resource "null_resource" "zip_lambda" {
-#   triggers = {
-#     always_run = "${timestamp()}"
-#   }
+resource "null_resource" "zip_lambda" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
 
-#   provisioner "local-exec" {
-#     command     = <<-EOT
-#       if [ -f trigger_ecr_push.zip ]; then
-#         rm trigger_ecr_push.zip
-#       fi
-#       zip trigger_ecr_push.zip trigger_ecr_push.py
-#       echo "trigger_ecr_push.zip created at $(pwd)/trigger_ecr_push.zip"
-#     EOT
-#     working_dir = path.module
-#   }
-# }
+  provisioner "local-exec" {
+    command     = <<-EOT
+      if [ -f trigger_ecr_push.zip ]; then
+        rm trigger_ecr_push.zip
+      fi
+      zip trigger_ecr_push.zip trigger_ecr_push.py
+      echo "trigger_ecr_push.zip created at $(pwd)/trigger_ecr_push.zip"
+    EOT
+    working_dir = path.module
+  }
+}
 
-# resource "aws_lambda_function" "trigger_codedeploy" {
-#   filename         = "trigger_ecr_push.zip"
-#   function_name    = "${var.PROJECT}-trigger-codedeploy-deployment"
-#   role             = aws_iam_role.lambda.arn
-#   handler          = "trigger_ecr_push.lambda_handler"
-#   runtime          = "python3.8"
-#   source_code_hash = filebase64sha256("trigger_ecr_push.zip")
+resource "aws_lambda_function" "trigger_codedeploy" {
+  filename         = "trigger_ecr_push.zip"
+  function_name    = "${var.PROJECT}-trigger-codedeploy-deployment"
+  role             = aws_iam_role.lambda.arn
+  handler          = "trigger_ecr_push.lambda_handler"
+  runtime          = "python3.8"
+  source_code_hash = filebase64sha256("trigger_ecr_push.zip")
 
-#   environment {
-#     variables = {
-#       S3_BUCKET                   = aws_s3_bucket.appspec.id
-#       CODEDEPLOY_APPLICATION_NAME = "${aws_codedeploy_app.app.name}"
-#       CODEDEPLOY_DEPLOYMENT_GROUP = "${aws_codedeploy_deployment_group.group.deployment_group_name}"
-#       ECR_URL                     = "${aws_ecr_repository.main.repository_url}"
-#     }
-#   }
+  environment {
+    variables = {
+      S3_BUCKET                        = aws_s3_bucket.appspec.id
+      CODEDEPLOY_APPLICATION_NAME      = "${aws_codedeploy_app.app.name}"
+      CODEDEPLOY_DEPLOYMENT_GROUP_NAME = "${aws_codedeploy_deployment_group.group.deployment_group_name}"
+      ECR_URL                          = "${aws_ecr_repository.main.repository_url}"
+    }
+  }
 
-#   depends_on = [null_resource.zip_lambda]
-# }
+  depends_on = [null_resource.zip_lambda]
+}
 
-# resource "aws_cloudwatch_event_rule" "ecr_image_push" {
-#   name        = "${var.PROJECT}-ecr-image-push-event"
-#   description = "${var.PROJECT} App: Trigger Lambda on ECR image push"
-#   event_pattern = jsonencode({
-#     "source" : ["aws.ecr"],
-#     "detail-type" : ["ECR Image Action"],
-#     "detail" : {
-#       "action-type" : ["PUSH"],
-#       "repository-name" : ["${aws_ecr_repository.main.name}"]
-#     }
-#   })
-# }
+resource "aws_cloudwatch_event_rule" "ecr_image_push" {
+  name        = "${var.PROJECT}-ecr-image-push-event"
+  description = "${var.PROJECT} App: Trigger Lambda on ECR image push"
+  event_pattern = jsonencode({
+    "source" : ["aws.ecr"],
+    "detail-type" : ["ECR Image Action"],
+    "detail" : {
+      "action-type" : ["PUSH"],
+      "repository-name" : ["${aws_ecr_repository.main.name}"]
+    }
+  })
+}
 
-# resource "aws_cloudwatch_event_target" "lambda_target" {
-#   rule      = aws_cloudwatch_event_rule.ecr_image_push.name
-#   target_id = "triggerLambda"
-#   arn       = aws_lambda_function.trigger_codedeploy.arn
-# }
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule      = aws_cloudwatch_event_rule.ecr_image_push.name
+  target_id = "triggerLambda"
+  arn       = aws_lambda_function.trigger_codedeploy.arn
+}
 
-# resource "aws_lambda_permission" "allow_eventbridge" {
-#   statement_id  = "AllowExecutionFromEventBridge"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.trigger_codedeploy.function_name
-#   principal     = "events.amazonaws.com"
-#   source_arn    = aws_cloudwatch_event_rule.ecr_image_push.arn
-# }
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.trigger_codedeploy.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.ecr_image_push.arn
+}
