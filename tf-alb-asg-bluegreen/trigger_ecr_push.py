@@ -27,10 +27,6 @@ def lambda_handler(event, context):
             autoRollbackConfiguration={
                 'enabled': True,
                 'events': ['DEPLOYMENT_FAILURE']
-            },
-            deploymentStyle={
-                'deploymentType': 'BLUE_GREEN',
-                'deploymentOption': 'WITH_TRAFFIC_CONTROL'
             }
         )
         return {

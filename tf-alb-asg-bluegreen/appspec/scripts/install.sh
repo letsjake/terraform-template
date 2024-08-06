@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "=======Install hook from CodeDeploy...======"
+echo "=======install.sh from CodeDeploy...======"
 export REGION=ap-northeast-2
 export ECR_URL=343475135657.dkr.ecr.ap-northeast-2.amazonaws.com/learn-terraform:latest
 export HOST_PORT=80
