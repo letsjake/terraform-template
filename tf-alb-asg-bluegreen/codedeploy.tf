@@ -128,6 +128,7 @@ resource "aws_iam_role_policy" "codedeploy_additional" {
   })
 }
 
+#NOTE: lambda function for triggering creating a deployment
 resource "aws_iam_role" "lambda" {
   name = "${var.PROJECT}-lambda-codedeploy-role"
   assume_role_policy = jsonencode({
