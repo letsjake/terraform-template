@@ -29,6 +29,9 @@ module "vpc" {
 
   azs                  = ["apne2-az1", "apne2-az2"]
   public_subnets       = ["172.31.4.0/24", "172.31.5.0/24"] 
+
+  #NOTE: If you use private subnets, uncomment the lines below
+
   # private_subnets      = ["172.31.6.0/24", "172.31.7.0/24"]
   # enable_nat_gateway   = true
   # single_nat_gateway   = true
@@ -41,6 +44,8 @@ module "vpc" {
 ###########################
 # Image & AutoScaling
 ###########################
+
+#NOTE: your docker command depends on the AMI. This template focuses on the Amazon Linux 2 AMI
 data "aws_ami" "amazon-linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -52,6 +57,8 @@ data "aws_ami" "amazon-linux" {
 }
 
 resource "aws_launch_template" "app" {
+
+  #NOTE: use either name or name_prefix
   name_prefix     = "${var.PROJECT}-"
   # name            = "${var.PROJECT}-template"
 
@@ -93,7 +100,7 @@ resource "aws_launch_template" "app" {
 resource "aws_autoscaling_group" "app" {
   name                 = var.PROJECT
   min_size             = 1
-  max_size             = 4
+  max_size             = 2
   desired_capacity     = 1
   vpc_zone_identifier  = module.vpc.public_subnets
   target_group_arns    = [aws_lb_target_group.app.arn]

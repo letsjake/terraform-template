@@ -12,6 +12,7 @@ This script aims to pursue a blue-green deployment policy using CodeDeploy, ALB,
 - Github Actions(refer to `workflow.template.yml` and reflect it to `.github/workflows/[NAME].yml`)
 
 ## Prerequisites
+* Github Actions Workflow: It occurs when you push your code to the branch you set.
 * keypair: You should create your keypair first to the corresponding region.
 
 ## How to use
